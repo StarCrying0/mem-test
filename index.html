@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Concert Memory Card Manager</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .card {
+        transition: all 0.3s ease;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+      .camera-number {
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+      .operator-name {
+        color: #0d6efd;
+        font-weight: 500;
+      }
+      .timestamp {
+        font-size: 0.9em;
+        color: #666;
+      }
+      .select2-container {
+        width: 100% !important;
+      }
+      .select2-container .select2-selection--single {
+        height: 38px !important;
+        padding: 6px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        display: flex;
+        align-items: center;
+      }
+      .select2-selection__rendered {
+        line-height: 24px !important;
+      }
+      .select2-selection__arrow {
+        height: 36px !important;
+      }
+      .btn-outline-warning:hover,
+      .btn-outline-warning:focus {
+        background-color: #ffc107;
+        color: #212529;
+        border-color: #ffc107;
+      }
+      .btn-warning,
+      .btn-outline-warning:hover,
+      .btn-outline-warning:focus {
+        background-color: #ff9800 !important;
+        color: #fff !important;
+        border-color: #ff9800 !important;
+      }
+      .btn-outline-warning {
+        border-color: #ff9800 !important;
+        color: #ff9800;
+      }
+      .inline-edit-input {
+        border: none;
+        border-bottom: 1.5px solid #0d6efd;
+        background: #f4f8ff;
+        padding: 2px 6px;
+        font-size: 1em;
+        width: 90px;
+        margin-right: 6px;
+        border-radius: 3px 3px 0 0;
+        outline: none;
+        display: inline-block;
+      }
+      .inline-edit-btn {
+        padding: 2px 10px;
+        font-size: 0.95em;
+        margin-right: 3px;
+        margin-left: 0;
+        border-radius: 4px;
+      }
+      .inline-edit-btn:last-child {
+        margin-right: 0;
+      }
+      .inline-edit-actions {
+        display: inline-block;
+      }
+      .editable-card-number {
+        cursor: pointer;
+        text-decoration: underline;
+        color: #0d6efd;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <h1 class="text-center mb-5">Concert Memory Card Manager</h1>
+
+      <!-- Add New Card Form -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Add New Memory Card</h5>
+          <form id="addCardForm">
+            <div class="row">
+              <div class="col-md-3">
+                <div class="mb-3">
+                  <label for="cameraNumber" class="form-label"
+                    >Camera Number</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="cameraNumber"
+                    required
+                    min="1"
+                    max="8"
+                  />
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="mb-3">
+                  <label for="operatorName" class="form-label"
+                    >Camera Operator</label
+                  >
+                  <select class="form-select" id="operatorName" required>
+                    <option value="">Select operator...</option>
+                    <option value="Ponlork">1. Ponlork</option>
+                    <option value="Chivon">2. Chivon</option>
+                    <option value="Lin">3. Lin</option>
+                    <option value="sophan">4. sophan</option>
+                    <option value="Chharith">5. Chharith</option>
+                    <option value="Dara">6. Dara</option>
+                    <option value="Thyro">7. Thyro</option>
+                    <option value="Bonteok">8. Bonteok</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="mb-3">
+                  <label for="cardNumber" class="form-label">Card Number</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="cardNumber"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="mb-3">
+                  <label for="status" class="form-label">Status</label>
+                  <select class="form-select" id="status" required>
+                    <option value="in-use">In Use</option>
+                    <option value="processing">Processing</option>
+                    <option value="formatted">Formatted</option>
+                    <option value="ready">Ready to Return</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="mb-3">
+                  <label for="photo" class="form-label">Photo(s)</label>
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="photo"
+                    accept="image/*"
+                    multiple
+                  />
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Card</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Cards Display -->
+      <div class="d-flex justify-content-end mb-3">
+        <button id="setAllInUseBtn" class="btn btn-primary">
+          Set All to In Use
+        </button>
+      </div>
+      <div class="row" id="cardsContainer">
+        <!-- Cards will be dynamically added here -->
+      </div>
+    </div>
+
+    <!-- Image Zoom Modal -->
+    <div
+      id="imageZoomModal"
+      style="
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <span
+        id="closeZoom"
+        style="
+          position: absolute;
+          top: 30px;
+          right: 50px;
+          font-size: 2.5rem;
+          color: white;
+          cursor: pointer;
+          z-index: 1060;
+        "
+        >&times;</span
+      >
+      <img
+        id="zoomedImage"
+        src=""
+        alt="Zoomed Card Photo"
+        style="
+          max-width: 90vw;
+          max-height: 80vh;
+          border-radius: 12px;
+          box-shadow: 0 0 30px #000;
+        "
+      />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+      // Initialize Select2 for operator dropdown
+      $(document).ready(function () {
+        $("#operatorName").select2({
+          placeholder: "Search operator...",
+          allowClear: true,
+        });
+      });
+
+      // Store cards in localStorage
+      let cards = JSON.parse(localStorage.getItem("cards")) || [];
+
+      // Function to save cards to localStorage
+      function saveCards() {
+        localStorage.setItem("cards", JSON.stringify(cards));
+      }
+
+      // Function to update card status
+      function updateCardStatus(cardId, newStatus) {
+        const card = cards.find((c) => c.id === cardId);
+        if (card) {
+          card.status = newStatus;
+          card.lastUpdated = new Date().toISOString();
+          saveCards();
+          displayCards();
+        }
+      }
+
+      // Function to delete a card
+      function deleteCard(cardId) {
+        cards = cards.filter((c) => c.id !== cardId);
+        saveCards();
+        displayCards();
+      }
+
+      // Function to display cards
+      function displayCards() {
+        const container = document.getElementById("cardsContainer");
+        container.innerHTML = "";
+
+        // Define operator order
+        const operatorOrder = [
+          "Ponlork",
+          "Chivon",
+          "Lin",
+          "sophan",
+          "Chharith",
+          "Dara",
+          "Thyro",
+          "Bonteok",
+        ];
+
+        // Sort cards by operator order
+        const sortedCards = cards.slice().sort((a, b) => {
+          return (
+            operatorOrder.indexOf(a.operatorName) -
+            operatorOrder.indexOf(b.operatorName)
+          );
+        });
+
+        sortedCards.forEach((card) => {
+          // Find all card numbers for the same camera/operator in 'Processing'
+          const processingCards = cards.filter(
+            (c) =>
+              c.cameraNumber === card.cameraNumber &&
+              c.operatorName === card.operatorName &&
+              c.status === "processing"
+          );
+          const processingCardNumbers = processingCards.map(
+            (c) => c.cardNumber
+          );
+          const showProcessingList = processingCardNumbers.length > 1;
+          const cardElement = document.createElement("div");
+          cardElement.className = "col-md-4 mb-4";
+          cardElement.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <span class="badge ${getStatusBadgeClass(
+                              card.status
+                            )} status-badge">${capitalizeStatus(
+            card.status
+          )}</span>
+                            <h5 class="card-title camera-number">Camera ${
+                              card.cameraNumber
+                            }</h5>
+                            <p class="card-text operator-name">Operator: ${
+                              card.operatorName
+                            }</p>
+                            <p class="card-text">Card Number: <span class="editable-card-number" style="cursor:pointer;text-decoration:underline;" data-card-id="${
+                              card.id
+                            }">${card.cardNumber}</span></p>
+                            ${
+                              showProcessingList
+                                ? `<div class='mb-2'><span class='fw-bold text-warning'>Processing:</span> <span>${processingCardNumbers.join(
+                                    ", "
+                                  )}</span></div>`
+                                : ""
+                            }
+                            ${
+                              card.photos && card.photos.length > 0
+                                ? card.photos
+                                    .map(
+                                      (photo) =>
+                                        `<img src="${photo}" alt="Card Photo" class="img-fluid mb-2 zoomable-card-photo me-2" style="max-height:60px;object-fit:contain;border-radius:8px;cursor:pointer;display:inline-block;" onclick="zoomImage('${photo}')">`
+                                    )
+                                    .join("")
+                                : ""
+                            }
+                            <p class="timestamp">Last Updated: ${new Date(
+                              card.lastUpdated
+                            ).toLocaleString()}</p>
+                            <div class="btn-group">
+                                <button class="btn btn-sm ${
+                                  card.status === "in-use"
+                                    ? "btn-primary text-white"
+                                    : "btn-outline-primary"
+                                }" onclick="updateCardStatus('${
+            card.id
+          }', 'in-use')">In Use</button>
+                                <button class="btn btn-sm ${
+                                  card.status === "processing"
+                                    ? "btn-warning text-white"
+                                    : "btn-outline-warning"
+                                }" onclick="updateCardStatus('${
+            card.id
+          }', 'processing')">Processing</button>
+                                <button class="btn btn-sm ${
+                                  card.status === "formatted"
+                                    ? "btn-success text-white"
+                                    : "btn-outline-success"
+                                }" onclick="updateCardStatus('${
+            card.id
+          }', 'formatted')">Formatted</button>
+                                <button class="btn btn-sm ${
+                                  card.status === "ready"
+                                    ? "btn-info text-white"
+                                    : "btn-outline-info"
+                                }" onclick="updateCardStatus('${
+            card.id
+          }', 'ready')">Ready</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCard('${
+                                  card.id
+                                }')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+          container.appendChild(cardElement);
+        });
+      }
+
+      // Function to get badge class based on status
+      function getStatusBadgeClass(status) {
+        switch (status) {
+          case "in-use":
+            return "bg-primary";
+          case "processing":
+            return "bg-warning";
+          case "formatted":
+            return "bg-success";
+          case "ready":
+            return "bg-info";
+          default:
+            return "bg-secondary";
+        }
+      }
+
+      // Add a function to capitalize the first letter of the status
+      function capitalizeStatus(status) {
+        return status.charAt(0).toUpperCase() + status.slice(1);
+      }
+
+      // Handle form submission
+      document
+        .getElementById("addCardForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const cameraNumber = document.getElementById("cameraNumber").value;
+          const operatorName = document.getElementById("operatorName").value;
+          const cardNumber = document.getElementById("cardNumber").value;
+          const status = document.getElementById("status").value;
+          const photoInput = document.getElementById("photo");
+          const files = Array.from(photoInput.files);
+
+          if (files.length > 0) {
+            let loadedImages = [];
+            let filesLoaded = 0;
+            files.forEach((file) => {
+              const reader = new FileReader();
+              reader.onload = function (event) {
+                loadedImages.push(event.target.result);
+                filesLoaded++;
+                if (filesLoaded === files.length) {
+                  addCard(
+                    cameraNumber,
+                    operatorName,
+                    cardNumber,
+                    status,
+                    loadedImages
+                  );
+                }
+              };
+              reader.readAsDataURL(file);
+            });
+          } else {
+            addCard(cameraNumber, operatorName, cardNumber, status, []);
+          }
+        });
+
+      function addCard(
+        cameraNumber,
+        operatorName,
+        cardNumber,
+        status,
+        photoDataUrls
+      ) {
+        // Check if a card with the same cameraNumber and operatorName exists
+        const existingCard = cards.find(
+          (card) =>
+            card.cameraNumber === cameraNumber &&
+            card.operatorName === operatorName
+        );
+        if (existingCard) {
+          // Update card number, status, and photos
+          existingCard.cardNumber = cardNumber;
+          existingCard.status = status;
+          existingCard.lastUpdated = new Date().toISOString();
+          if (photoDataUrls && photoDataUrls.length > 0) {
+            existingCard.photos = photoDataUrls;
+          }
+        } else {
+          const newCard = {
+            id: Date.now().toString(),
+            cameraNumber,
+            operatorName,
+            cardNumber,
+            status,
+            lastUpdated: new Date().toISOString(),
+            photos: photoDataUrls,
+          };
+          cards.push(newCard);
+        }
+        saveCards();
+        displayCards();
+        document.getElementById("addCardForm").reset();
+        $("#operatorName").val("").trigger("change"); // Reset Select2
+      }
+
+      // Initial display
+      displayCards();
+
+      // Image zoom modal logic with left/right navigation
+      let zoomedCardPhotos = [];
+      let zoomedPhotoIndex = 0;
+      function zoomImage(photoSrc) {
+        // Find which card and which image index
+        const card = cards.find((c) => c.photos && c.photos.includes(photoSrc));
+        if (card) {
+          zoomedCardPhotos = card.photos;
+          zoomedPhotoIndex = card.photos.indexOf(photoSrc);
+          document.getElementById("zoomedImage").src = photoSrc;
+          document.getElementById("imageZoomModal").style.display = "flex";
+        }
+      }
+      document.getElementById("closeZoom").onclick = function () {
+        document.getElementById("imageZoomModal").style.display = "none";
+        document.getElementById("zoomedImage").src = "";
+        zoomedCardPhotos = [];
+      };
+      document.getElementById("imageZoomModal").onclick = function (e) {
+        if (e.target === this) {
+          this.style.display = "none";
+          document.getElementById("zoomedImage").src = "";
+          zoomedCardPhotos = [];
+        }
+      };
+      document.addEventListener("keydown", function (e) {
+        const modal = document.getElementById("imageZoomModal");
+        if (modal.style.display === "flex" && zoomedCardPhotos.length > 1) {
+          if (e.key === "ArrowLeft") {
+            // Go to previous image
+            zoomedPhotoIndex =
+              (zoomedPhotoIndex - 1 + zoomedCardPhotos.length) %
+              zoomedCardPhotos.length;
+            document.getElementById("zoomedImage").src =
+              zoomedCardPhotos[zoomedPhotoIndex];
+          } else if (e.key === "ArrowRight") {
+            // Go to next image
+            zoomedPhotoIndex = (zoomedPhotoIndex + 1) % zoomedCardPhotos.length;
+            document.getElementById("zoomedImage").src =
+              zoomedCardPhotos[zoomedPhotoIndex];
+          }
+        }
+        // Close modal on Escape
+        if (modal.style.display === "flex" && e.key === "Escape") {
+          modal.style.display = "none";
+          document.getElementById("zoomedImage").src = "";
+          zoomedCardPhotos = [];
+        }
+      });
+
+      // Set all cards to 'In Use' when button is clicked
+      document.getElementById("setAllInUseBtn").onclick = function () {
+        cards.forEach((card) => {
+          card.status = "in-use";
+          card.lastUpdated = new Date().toISOString();
+        });
+        saveCards();
+        displayCards();
+      };
+
+      // Inline edit card number logic
+      document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("editable-card-number")) {
+          const span = e.target;
+          const cardId = span.getAttribute("data-card-id");
+          const card = cards.find((c) => c.id === cardId);
+          if (!card) return;
+          // Replace span with input and buttons
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = card.cardNumber;
+          input.className = "inline-edit-input";
+          input.setAttribute("data-edit-card-id", cardId);
+          const actions = document.createElement("span");
+          actions.className = "inline-edit-actions";
+          const saveBtn = document.createElement("button");
+          saveBtn.textContent = "Save";
+          saveBtn.className = "btn btn-primary btn-sm inline-edit-btn";
+          const cancelBtn = document.createElement("button");
+          cancelBtn.textContent = "Cancel";
+          cancelBtn.className = "btn btn-secondary btn-sm inline-edit-btn";
+          const errorMsg = document.createElement("div");
+          errorMsg.className = "text-danger mt-1 mb-0";
+          errorMsg.style.fontSize = "0.95em";
+          errorMsg.style.display = "none";
+          errorMsg.textContent =
+            "This card number already exists for another card. Please enter a unique card number.";
+          actions.appendChild(saveBtn);
+          actions.appendChild(cancelBtn);
+          const parent = span.parentElement;
+          parent.replaceChild(input, span);
+          parent.appendChild(actions);
+          parent.appendChild(errorMsg);
+          input.focus();
+          // Save handler
+          saveBtn.onclick = function () {
+            // Prevent duplicate card number
+            const newCardNumber = input.value.trim();
+            if (
+              cards.some(
+                (c) => c.cardNumber === newCardNumber && c.id !== card.id
+              )
+            ) {
+              errorMsg.style.display = "";
+              input.classList.add("is-invalid");
+              input.focus();
+              return;
+            }
+            card.cardNumber = newCardNumber;
+            card.lastUpdated = new Date().toISOString();
+            saveCards();
+            displayCards();
+          };
+          // Cancel handler (attach after appending to DOM)
+          cancelBtn.onclick = function () {
+            displayCards();
+          };
+        }
+      });
+    </script>
+  </body>
+</html>
